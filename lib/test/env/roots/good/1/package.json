@@ -1,0 +1,10 @@
+{
+  "name": "rlink",
+  "apps": {
+    "my": "app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.tm.tmcs:react/rlink.git"
+  }
+}
