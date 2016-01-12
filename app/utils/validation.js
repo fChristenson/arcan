@@ -62,18 +62,40 @@ var filenameMatches = function(files, paths) {
 
 module.exports.filenameMatches = filenameMatches;
 
+/**
+ * [a]->[b]->[c]
+ *
+ * Takes an array of strings and an array of filepaths,
+ * returns the difference between the strings and the
+ * filenames of the paths.
+ *
+ * @param files - String array
+ * @param paths - String array with file paths
+ *
+ * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
+ */
+var missingFilenames = function(files, paths) {
+
+    return R.difference(files, filenames(paths));
+
+};
+
+module.exports.missingFilenames = missingFilenames;
+
 var validateLayout = function(layout, config) {
 
-    var filesConfig       = config.files;
-    var directoriesConfig = config.directories;
-    var layoutFiles       = layout.files;
-    var layoutDirectories = layout.directories;
+    var filesConfig       = config.files || {};
+    var directoriesConfig = config.directories  || {};
+    var layoutFiles       = layout.files  || {};
+    var layoutDirectories = layout.directories  || {};
 
     // We validate the directories files
-    var invalidFiles      = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, layoutFiles) : [];
-    var requiredFiles     = (filesConfig.required) ? filenameMatches(filesConfig.required, layoutFiles) : [];
+    var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, layoutFiles) : [];
+    var missingRequiredFiles = (filesConfig.required) ? missingFilenames(filesConfig.required, layoutFiles) : [];
+    var requiredFiles        = (filesConfig.required) ? filenameMatches(filesConfig.required, layoutFiles) : [];
+    var unMatchedFiles       = R.difference(invalidFiles, requiredFiles);
 
-    return R.difference(invalidFiles, requiredFiles);
+    return unMatchedFiles.concat(missingRequiredFiles);
 
 };
 
