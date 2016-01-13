@@ -82,50 +82,6 @@ describe('Util test', function() {
 
     });
 
-    describe('matchErrors', function() {
-
-        it('should return empty if all strings match the pattern', function(done) {
-
-            var strings = ['foo', 'foo'];
-            var errors = U.matchErrors(/foo/, strings);
-            assert.equal(errors.length, 0);
-            done();
-
-        });
-
-        it('should return array with unmatched strings', function(done) {
-
-            var strings = ['foo', 'baz'];
-            var errors = U.matchErrors(/foo/, strings);
-            assert.equal(errors.length, 1);
-            done();
-
-        });
-
-    });
-
-    describe('fileErrors', function() {
-
-        it('should return empty if all filenames match the pattern', function(done) {
-
-            var strings = ['foo/bar/foo', '/foo/'];
-            var errors = U.fileErrors(/foo/, strings);
-            assert.equal(errors.length, 0);
-            done();
-
-        });
-
-        it('should return array with unmatched filenames', function(done) {
-
-            var strings = ['/foo', 'foo/baz'];
-            var errors = U.fileErrors(/foo/, strings);
-            assert.equal(errors.length, 1);
-            done();
-
-        });
-
-    });
-
     describe('validateLayout', function() {
 
         it('should return empty array if config is empty', function(done) {
@@ -217,7 +173,7 @@ describe('Util test', function() {
 
         });
 
-        it('should return array if a required file is missing', function(done) {
+        it.only('should return array if a required file is missing', function(done) {
 
             var layout = U.directoryToObject(testDir);
             var config = {
@@ -251,6 +207,25 @@ describe('Util test', function() {
 
             var result = U.validateLayout(layout, config);
             assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return array if any directory fail to match pattern', function(done) {
+
+            var layout = U.directoryToObject(testDir);
+            var config = {
+
+                directories: {
+
+                    pattern: /^fail/
+
+                }
+
+            };
+
+            var result = U.validateLayout(layout, config);
+            assert.equal(result.length, 2);
             done();
 
         });

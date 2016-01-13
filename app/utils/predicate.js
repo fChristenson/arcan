@@ -1,5 +1,6 @@
 'use strict';
 
+var path = require('path');
 var R    = require('ramda');
 var fs   = require('fs');
 
@@ -40,3 +41,18 @@ function isDirectory(filePath) {
 };
 
 module.exports.isDirectory = isDirectory;
+
+var filenameMatchInPath = function(filenames) {
+
+    return function(filePath) {
+
+        var fileName    = path.basename(filePath);
+        var match       = R.find(R.equals(fileName), filenames);
+
+        return !!match;
+
+    };
+
+};
+
+module.exports.filenameMatchInPath = filenameMatchInPath;
