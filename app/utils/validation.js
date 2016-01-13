@@ -20,6 +20,8 @@ module.exports.filenames = filenames;
  *
  * @param filepath - path to file
  * @returns String
+ *
+ * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
  */
 var filename = function(filepath) {
 
@@ -30,8 +32,10 @@ var filename = function(filepath) {
 module.exports.filename = filename;
 
 /**
- * Returns an array of strings that did not match the
- * provided pattern.
+ * RegExp a->[a]->[b]
+ *
+ * Returns an array of file paths that did not end with a
+ * filename that matched the provided pattern.
  *
  * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
  */
@@ -129,6 +133,30 @@ var missingFilenames = function(files, paths) {
 
 module.exports.missingFilenames = missingFilenames;
 
+/**
+ * Layout {}->Config {}->[]
+ * @param layout - A object structured like a directory tree
+ * {
+ *      foo/bar: {
+ *
+ *          files: ['file1', 'file2'],
+ *          directories: {
+ *
+ *              foo/bar/baz: {...}
+ *
+ *          }
+ *      }
+ * }
+ * @param config - A object with a directory rule structure
+ * {
+ *   files: ['file1', 'file2'],
+ *   directories: {
+ *
+ *     foo/bar/baz: {...}
+ *
+ *   }
+ * }
+ */
 var validateLayout = function(layout, config) {
 
     var filesConfig = config.files       || {};
