@@ -123,8 +123,7 @@ module.exports.filenameMatches = filenameMatches;
  */
 var missingFilenames = function(files, paths) {
 
-    var diff = R.difference(files, filenames(paths));
-    return paths.filter(P.filenameMatchInPath(diff)) ;
+    return R.difference(files, filenames(paths));
 
 };
 

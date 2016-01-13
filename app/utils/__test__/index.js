@@ -173,7 +173,7 @@ describe('Util test', function() {
 
         });
 
-        it.only('should return array if a required file is missing', function(done) {
+        it('should return array if a required file is missing', function(done) {
 
             var layout = U.directoryToObject(testDir);
             var config = {
