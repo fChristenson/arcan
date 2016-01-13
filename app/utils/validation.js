@@ -1,35 +1,10 @@
 'use strict';
 
+var F    = require('./file');
 var P    = require('./predicate');
 var R    = require('ramda');
 var path = require('path');
-
-/**
- * Returns the filenames of an array of paths
- *
- * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
- */
-var filenames = R.map(path.basename);
-
-module.exports.filenames = filenames;
-
-/**
- * String a->b
- *
- * Returns the filename of the provided path.
- *
- * @param filepath - path to file
- * @returns String
- *
- * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
- */
-var filename = function(filepath) {
-
-    return path.basename(filepath);
-
-};
-
-module.exports.filename = filename;
+var fs   = require('fs');
 
 /**
  * RegExp a->[a]->[b]
@@ -41,7 +16,7 @@ module.exports.filename = filename;
  */
 var matchPathErrors = R.curry(function(pattern, paths) {
 
-    var fileNames  = paths.map(filename);
+    var fileNames  = paths.map(F.filename);
     var validNames = fileNames.filter(R.test(pattern));
     var valid      = paths.filter(P.filenameMatchInPath(validNames));
 
@@ -106,7 +81,7 @@ module.exports.directoryErrors = directoryErrors;
  */
 var filenameMatches = function(files, paths) {
 
-    var diff = R.intersection(files, filenames(paths));
+    var diff = R.intersection(files, F.filenames(paths));
     return paths.filter(P.filenameMatchInPath(diff)) ;
 
 };
@@ -127,11 +102,37 @@ module.exports.filenameMatches = filenameMatches;
  */
 var missingFilenames = function(files, paths) {
 
-    return R.difference(files, filenames(paths));
+    return R.difference(files, F.filenames(paths));
 
 };
 
 module.exports.missingFilenames = missingFilenames;
+
+/**
+ * []->[]->[]
+ *
+ * Takes a list of directory paths,
+ * diffs their files against a provided array of strings
+ * and returns the name of the files missing in the directory.
+ *
+ * @param requiredFiles
+ * @param paths
+ * @returns {*|Array}
+ */
+var missingDirFiles = function(requiredFiles, paths) {
+
+    return paths.map(function(filepath) {
+
+        var files        = fs.readdirSync(filepath);
+        var missingFiles = R.difference(requiredFiles, files);
+
+        return {directory: path.dirname(filepath), missing: missingFiles};
+
+    });
+
+};
+
+module.exports.missingDirFiles = missingDirFiles;
 
 /**
  * Layout {}->Config {}->[]
@@ -163,6 +164,8 @@ var validateLayout = function(layout, config) {
     var dirConfig   = config.directories || {};
     var fileLayout  = layout.files       || {};
     var dirLayout   = Object.keys(layout.directories);
+    // list of files each directory must have
+    var requireAll  = (config.directories && config.directories.requireAll) ? config.directories.requireAll : [];
 
     // We validate the directories files
     var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout)        : [];
@@ -171,12 +174,13 @@ var validateLayout = function(layout, config) {
     var unMatchedFiles       = R.difference(invalidFiles, requiredFiles);
 
     // We validate the directories subdirectories
-    var invalidDirs          = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
-    var missingRequiredDirs  = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
-    var requiredDirs         = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
-    var unMatchedDirs        = R.difference(invalidDirs, requiredDirs);
+    var invalidDirs         = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
+    var missingRequiredDirs = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
+    var requiredDirs        = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
+    var unMatchedDirs       = R.difference(invalidDirs, requiredDirs);
+    var missingDirFilePaths = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout)       : [];
 
-    return R.flatten([unMatchedFiles, missingRequiredFiles, unMatchedDirs, missingRequiredDirs]);
+    return R.flatten([unMatchedFiles, missingRequiredFiles, unMatchedDirs, missingRequiredDirs, missingDirFilePaths]);
 
 };
 

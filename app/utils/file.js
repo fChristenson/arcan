@@ -73,3 +73,30 @@ module.exports.readdirAbs = readdirAbs;
 var directoryToObject = R.compose(filesToObject, readdirAbs);
 
 module.exports.directoryToObject = directoryToObject;
+
+/**
+ * Returns the filenames of an array of paths
+ *
+ * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
+ */
+var filenames = R.map(path.basename);
+
+module.exports.filenames = filenames;
+
+/**
+ * String a->b
+ *
+ * Returns the filename of the provided path.
+ *
+ * @param filepath - path to file
+ * @returns String
+ *
+ * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
+ */
+var filename = function(filepath) {
+
+    return path.basename(filepath);
+
+};
+
+module.exports.filename = filename;
