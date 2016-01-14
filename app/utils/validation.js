@@ -121,14 +121,21 @@ module.exports.missingFilenames = missingFilenames;
  */
 var missingDirFiles = function(requiredFiles, paths) {
 
-    return paths.map(function(filepath) {
+    var result = [];
+    paths.forEach(function(filepath) {
 
         var files        = fs.readdirSync(filepath);
         var missingFiles = R.difference(requiredFiles, files);
 
-        return {directory: path.dirname(filepath), missing: missingFiles};
+        if(missingFiles.length > 0) {
+
+            result.push({directory: path.dirname(filepath), missing: missingFiles});
+
+        }
 
     });
+
+    return result;
 
 };
 
@@ -158,14 +165,15 @@ module.exports.missingDirFiles = missingDirFiles;
  *   }
  * }
  */
-var validateLayout = function(layout, config) {
+var validateLayout = function(directoryPath, config) {
 
+    var layout      = F.directoryToObject(directoryPath);
     var filesConfig = config.files       || {};
     var dirConfig   = config.directories || {};
     var fileLayout  = layout.files       || {};
     var dirLayout   = Object.keys(layout.directories);
-    // list of files each directory must have
-    var requireAll  = (config.directories && config.directories.requireAll) ? config.directories.requireAll : [];
+    // list of files each subdirectory must have
+    var requireAll  = (dirConfig.requireAll) ? dirConfig.requireAll : [];
 
     // We validate the directories files
     var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout)        : [];
@@ -173,14 +181,36 @@ var validateLayout = function(layout, config) {
     var requiredFiles        = (filesConfig.required) ? filenameMatches(filesConfig.required, fileLayout)  : [];
     var unMatchedFiles       = R.difference(invalidFiles, requiredFiles);
 
-    // We validate the directories subdirectories
+    // We validate the directory subdirectories
     var invalidDirs         = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
     var missingRequiredDirs = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
     var requiredDirs        = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
     var unMatchedDirs       = R.difference(invalidDirs, requiredDirs);
     var missingDirFilePaths = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout)       : [];
+    var subdirs;
+    var subdirErrors;
+    var subdirPath;
 
-    return R.flatten([unMatchedFiles, missingRequiredFiles, unMatchedDirs, missingRequiredDirs, missingDirFilePaths]);
+    dirConfig = R.dissoc('requireAll', dirConfig);
+    dirConfig = R.dissoc('pattern', dirConfig);
+    dirConfig = R.dissoc('files', dirConfig);
+    dirConfig = R.dissoc('required', dirConfig);
+    subdirs = Object.keys(dirConfig);
+
+    if (subdirs.length > 0) {
+
+        subdirs.forEach(function(subdirName) {
+
+            subdirPath = path.join(directoryPath, subdirName);
+            subdirErrors = validateLayout(subdirPath, config.directories[subdirName]);
+
+        });
+
+    }
+
+    subdirErrors = (subdirErrors) ? subdirErrors : [];
+
+    return R.flatten([unMatchedFiles, missingRequiredFiles, missingRequiredDirs, unMatchedDirs, missingDirFilePaths, subdirErrors]);
 
 };
 

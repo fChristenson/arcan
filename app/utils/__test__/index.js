@@ -86,10 +86,9 @@ describe('Util test', function() {
 
         it('should return empty array if config is empty', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {};
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -97,7 +96,6 @@ describe('Util test', function() {
 
        it('should return empty array if all files match the pattern', function(done) {
 
-           var layout = U.directoryToObject(testDir);
            var config = {
 
                files: {
@@ -108,7 +106,7 @@ describe('Util test', function() {
 
            };
 
-           var result = U.validateLayout(layout, config);
+           var result = U.validateLayout(testDir, config);
            assert.equal(result.length, 0);
            done();
 
@@ -116,7 +114,6 @@ describe('Util test', function() {
 
         it('should return empty array if files are matched by required', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 files: {
@@ -127,7 +124,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -135,7 +132,6 @@ describe('Util test', function() {
 
         it('should return empty array if all files are matched by either pattern or required files', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 files: {
@@ -147,7 +143,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -155,7 +151,6 @@ describe('Util test', function() {
 
         it('should return array if any file fails the pattern check', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 files: {
@@ -167,7 +162,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 1);
             done();
 
@@ -175,7 +170,6 @@ describe('Util test', function() {
 
         it('should return array if a required file is missing', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 files: {
@@ -186,7 +180,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 1);
             done();
 
@@ -194,18 +188,17 @@ describe('Util test', function() {
 
         it('should return empty array if all directories match the provided pattern', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
 
-                    pattern: /^[0-9]/
+                    pattern: /^dir[0-9]/
 
                 }
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -213,7 +206,6 @@ describe('Util test', function() {
 
         it('should return array if any directory fail to match pattern', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
@@ -224,7 +216,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 2);
             done();
 
@@ -232,18 +224,17 @@ describe('Util test', function() {
 
         it('should return empty array if all directories match required', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
 
-                    required: ['1', '2']
+                    required: ['dir1', 'dir2']
 
                 }
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -251,7 +242,6 @@ describe('Util test', function() {
 
         it('should return array if any directory fail to match required', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
@@ -262,7 +252,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 1);
             done();
 
@@ -270,19 +260,18 @@ describe('Util test', function() {
 
         it('should return empty array if all directories are matched by either pattern or required files', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
 
-                    pattern: /^1/,
-                    required: ['2']
+                    pattern: /^dir1/,
+                    required: ['dir2']
 
                 }
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -290,7 +279,6 @@ describe('Util test', function() {
 
         it('should return emtpy array if all directories contain all files in requireAll', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
@@ -301,7 +289,7 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 0);
             done();
 
@@ -309,7 +297,6 @@ describe('Util test', function() {
 
         it('should return array if any directory fail to contain all files in requireAll', function(done) {
 
-            var layout = U.directoryToObject(testDir);
             var config = {
 
                 directories: {
@@ -320,8 +307,60 @@ describe('Util test', function() {
 
             };
 
-            var result = U.validateLayout(layout, config);
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 2);
+            done();
+
+        });
+
+        it('should return empty array if subdirectory files all match the provided pattern', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir1: {
+
+                        files: {
+
+                            pattern: /required/
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return array if subdirectory files do not all match the provided pattern', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir1: {
+
+                        files: {
+
+                            pattern: /fail/
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 1);
             done();
 
         });
