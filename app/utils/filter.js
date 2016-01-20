@@ -13,6 +13,8 @@ var R = require('ramda');
  * @param errors - array of validation error objects
  * @param paths  - array if file paths
  * @returns Array of objects
+ *
+ * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
  */
 var filterErrors = function (errors, paths) {
 

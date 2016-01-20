@@ -597,7 +597,7 @@ describe('Util test', function() {
                         directories: {
 
                             fail: {}
-                            
+
                         }
                     }
 
