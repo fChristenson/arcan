@@ -53,12 +53,18 @@ module.exports.filesToObject = filesToObject;
  */
 var readdirAbs = function(dirPath) {
 
-    var files = fs.readdirSync(dirPath);
-    return files.map(function(file) {
+    if (fs.existsSync(dirPath)) {
 
-        return path.join(dirPath, file);
+        var files = fs.readdirSync(dirPath);
+        return files.map(function(file) {
 
-    });
+            return path.join(dirPath, file);
+
+        });
+
+    }
+
+    return [];
 
 };
 

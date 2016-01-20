@@ -17,7 +17,13 @@ var fs   = require('fs');
  */
 function isFile(filePath) {
 
-    return fs.statSync(filePath).isFile();
+    if (fs.existsSync(filePath)) {
+
+        return fs.statSync(filePath).isFile();
+
+    }
+
+    return false;
 
 };
 
@@ -36,7 +42,13 @@ module.exports.isFile = isFile;
  */
 function isDirectory(filePath) {
 
-    return fs.statSync(filePath).isDirectory();
+    if(fs.existsSync(filePath)) {
+
+        return fs.statSync(filePath).isDirectory();
+
+    }
+
+    return false;
 
 };
 

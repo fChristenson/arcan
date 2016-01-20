@@ -584,6 +584,33 @@ describe('Util test', function() {
 
         });
 
+        it('should return an empty array if a config directory does not exist', function (done) {
+
+            var config = {
+
+                directories: {
+
+                    fail: {},
+
+                    dir1: {
+
+                        directories: {
+
+                            fail: {}
+                            
+                        }
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
         it('should return a array of objects that contain the path to the file error and a message', function(done) {
 
             var fileFails = {
