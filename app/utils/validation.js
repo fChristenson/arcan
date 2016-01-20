@@ -1,26 +1,38 @@
 'use strict';
 
-var F    = require('./file');
-var P    = require('./predicate');
-var R    = require('ramda');
-var path = require('path');
-var fs   = require('fs');
+var Filter    = require('./filter');
+var File      = require('./file');
+var Predicate = require('./predicate');
+var Ramda     = require('ramda');
+var path      = require('path');
+var fs        = require('fs');
 
 /**
- * RegExp a->[a]->[b]
+ * RegExp a->[]->[{path: b, error: b}]
  *
  * Returns an array of file paths that did not end with a
  * filename that matched the provided pattern.
  *
  * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
  */
-var matchPathErrors = R.curry(function(pattern, paths) {
+var matchPathErrors = Ramda.curry(function(pattern, paths) {
 
-    var fileNames  = paths.map(F.filename);
-    var validNames = fileNames.filter(R.test(pattern));
-    var valid      = paths.filter(P.filenameMatchInPath(validNames));
+    var fileNames  = paths.map(File.filename);
+    var validNames = fileNames.filter(Ramda.test(pattern));
+    var valid      = paths.filter(Predicate.filenameMatchInPath(validNames));
+    var invalid    = Ramda.difference(paths, valid);
+    var result     = invalid.map(function(invalidPath) {
 
-    return R.difference(paths, valid);
+       return {
+
+           path: invalidPath,
+           error: File.filename(invalidPath) + ' does not match ' + pattern
+
+       };
+
+    });
+
+    return result;
 
 });
 
@@ -41,7 +53,8 @@ module.exports.matchPathErrors = matchPathErrors;
  */
 var fileErrors = function(pattern, paths) {
 
-  return matchPathErrors(pattern, paths).filter(P.isFile);
+    var isFile = Ramda.compose(Predicate.isFile, Ramda.prop('path'));
+    return matchPathErrors(pattern, paths).filter(isFile);
 
 };
 
@@ -61,7 +74,8 @@ module.exports.fileErrors = fileErrors;
  */
 var directoryErrors = function(pattern, paths) {
 
-    return matchPathErrors(pattern, paths).filter(P.isDirectory);
+    var isDir = Ramda.compose(Predicate.isDirectory, Ramda.prop('path'));
+    return matchPathErrors(pattern, paths).filter(isDir);
 
 };
 
@@ -81,8 +95,8 @@ module.exports.directoryErrors = directoryErrors;
  */
 var filenameMatches = function(files, paths) {
 
-    var diff = R.intersection(files, F.filenames(paths));
-    return paths.filter(P.filenameMatchInPath(diff)) ;
+    var diff = Ramda.intersection(files, File.filenames(paths));
+    return paths.filter(Predicate.filenameMatchInPath(diff)) ;
 
 };
 
@@ -102,7 +116,18 @@ module.exports.filenameMatches = filenameMatches;
  */
 var missingFilenames = function(files, paths) {
 
-    return R.difference(files, F.filenames(paths));
+    var missing = Ramda.difference(files, File.filenames(paths));
+    return missing.map(function(file) {
+
+        var filepath = path.dirname(paths[0]);
+        return {
+
+           path: filepath,
+           error: file + ' is missing in ' + File.filename(filepath)
+
+        };
+
+    });
 
 };
 
@@ -113,7 +138,8 @@ module.exports.missingFilenames = missingFilenames;
  *
  * Takes a list of directory paths,
  * diffs their files against a provided array of strings
- * and returns the name of the files missing in the directory.
+ * and returns a list of object with the path to the directory
+ * that is missing files.
  *
  * @param requiredFiles
  * @param paths
@@ -125,11 +151,19 @@ var missingDirFiles = function(requiredFiles, paths) {
     paths.forEach(function(filepath) {
 
         var files        = fs.readdirSync(filepath);
-        var missingFiles = R.difference(requiredFiles, files);
+        var missingFiles = Ramda.difference(requiredFiles, files);
+        var error;
 
         if(missingFiles.length > 0) {
 
-            result.push({directory: path.dirname(filepath), missing: missingFiles});
+            error = {
+
+                path: filepath,
+                error: File.filename(filepath) + ' is missing ' + missingFiles
+
+            };
+
+            result.push(error);
 
         }
 
@@ -167,50 +201,47 @@ module.exports.missingDirFiles = missingDirFiles;
  */
 var validateLayout = function(directoryPath, config) {
 
-    var layout      = F.directoryToObject(directoryPath);
-    var filesConfig = config.files       || {};
-    var dirConfig   = config.directories || {};
-    var fileLayout  = layout.files       || {};
-    var dirLayout   = Object.keys(layout.directories);
+    var layout               = File.directoryToObject(directoryPath);
+    var filesConfig          = config.files       || {};
+    var dirConfig            = config.directories || {};
+    var fileLayout           = layout.files       || {};
+    var dirLayout            = Object.keys(layout.directories);
     // list of files each subdirectory must have
-    var requireAll  = (dirConfig.requireAll) ? dirConfig.requireAll : [];
-
+    var requireAll           = (dirConfig.requireAll) ? dirConfig.requireAll : [];
     // We validate the directories files
     var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout)        : [];
     var missingRequiredFiles = (filesConfig.required) ? missingFilenames(filesConfig.required, fileLayout) : [];
     var requiredFiles        = (filesConfig.required) ? filenameMatches(filesConfig.required, fileLayout)  : [];
-    var unMatchedFiles       = R.difference(invalidFiles, requiredFiles);
-
+    var unMatchedFiles       = Filter.filterErrors(invalidFiles, requiredFiles);
     // We validate the directory subdirectories
-    var invalidDirs         = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
-    var missingRequiredDirs = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
-    var requiredDirs        = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
-    var unMatchedDirs       = R.difference(invalidDirs, requiredDirs);
-    var missingDirFilePaths = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout)       : [];
+    var invalidDirs          = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
+    var missingRequiredDirs  = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
+    var requiredDirs         = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
+    var unMatchedDirs        = Filter.filterErrors(invalidDirs, requiredDirs);
+    var missingDirFilePaths  = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout)       : [];
     var subdirs;
     var subdirErrors;
     var subdirPath;
-
-    dirConfig = R.dissoc('requireAll', dirConfig);
-    dirConfig = R.dissoc('pattern', dirConfig);
-    dirConfig = R.dissoc('files', dirConfig);
-    dirConfig = R.dissoc('required', dirConfig);
-    subdirs = Object.keys(dirConfig);
+    // We remove properties that are configs and not directories
+    dirConfig = Ramda.dissoc('requireAll', dirConfig);
+    dirConfig = Ramda.dissoc('pattern', dirConfig);
+    dirConfig = Ramda.dissoc('files', dirConfig);
+    dirConfig = Ramda.dissoc('required', dirConfig);
+    subdirs   = Object.keys(dirConfig);
 
     if (subdirs.length > 0) {
 
-        subdirs.forEach(function(subdirName) {
+        subdirErrors = subdirs.map(function(subdirName) {
 
-            subdirPath = path.join(directoryPath, subdirName);
-            subdirErrors = validateLayout(subdirPath, config.directories[subdirName]);
+            subdirPath   = path.join(directoryPath, subdirName);
+            return validateLayout(subdirPath, config.directories[subdirName]);
 
         });
 
     }
 
     subdirErrors = (subdirErrors) ? subdirErrors : [];
-
-    return R.flatten([unMatchedFiles, missingRequiredFiles, missingRequiredDirs, unMatchedDirs, missingDirFilePaths, subdirErrors]);
+    return Ramda.flatten([unMatchedFiles, missingRequiredFiles, missingRequiredDirs, unMatchedDirs, missingDirFilePaths, subdirErrors]);
 
 };
 

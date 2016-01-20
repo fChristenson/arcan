@@ -54,7 +54,7 @@ describe('Util test', function() {
             assert.equal(result.files.length, 2);
             assert.equal(keys.length, 2); // 2 subdir in our dir
 
-            assert.equal(subdirectory1.files.length, 1);
+            assert.equal(subdirectory1.files.length, 2);
             assert.equal(Object.keys(subdirectory1.directories).length, 0);
 
             assert.equal(subdirectory2.files.length, 1);
@@ -323,7 +323,7 @@ describe('Util test', function() {
 
                         files: {
 
-                            pattern: /required/
+                            pattern: /req/
 
                         }
 
@@ -360,7 +360,281 @@ describe('Util test', function() {
             };
 
             var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 2);
+            done();
+
+        });
+
+        it('should return empty array if subdirectory has provided required files', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir1: {
+
+                        files: {
+
+                            required: ['required']
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return array if subdirectory is missing provided required files', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir1: {
+
+                        files: {
+
+                            required: ['fail']
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
             assert.equal(result.length, 1);
+            done();
+
+        });
+
+        it('should return empty array if subdirectory covers all file configs', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir1: {
+
+                        files: {
+
+                            pattern: /^req/,
+                            required: ['required']
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return empty array if subdirectory files all match the provided pattern', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir2: {
+
+                        directories: {
+
+                            dir3: {
+
+                                files: {
+
+                                    pattern: /nested/
+
+                                }
+
+                            }
+
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return array if subdirectory files do not all match the provided pattern', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir2: {
+
+                        directories: {
+
+                            dir3: {
+
+                                files: {
+
+                                    pattern: /fail/
+
+                                }
+
+                            }
+
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 1);
+            done();
+
+        });
+
+        it('should return empty array if subdirectory has provided required files', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir2: {
+
+                        directories: {
+
+                            dir3: {
+
+                                files: {
+
+                                    required: ['nested_required']
+
+                                }
+
+                            }
+
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
+        it('should return array if subdirectory is missing provided required files', function(done) {
+
+            var config = {
+
+                directories: {
+
+                    dir2: {
+
+                        directories: {
+
+                            dir3: {
+
+                                files: {
+
+                                    required: ['fail']
+
+                                }
+
+                            }
+
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 1);
+            done();
+
+        });
+
+        it('should return a array of objects that contain the path to the file error and a message', function(done) {
+
+            var fileFails = {
+
+                pattern: /fail/,
+                required: ['fail']
+
+            };
+
+            var config = {
+
+                files: fileFails,
+
+                directories: {
+
+                    dir1: {
+
+                        files: fileFails
+
+                    },
+
+                    dir2: {
+
+                        files: fileFails,
+
+                        directories: {
+
+                            dir3: {
+
+                                files: fileFails
+
+                            }
+
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            result.forEach(function(error) {
+
+                assert.equal(typeof error, 'object');
+                assert.ok(error.path);
+                assert.ok(error.error);
+
+            });
+            assert.equal(result.length, 10);
             done();
 
         });
