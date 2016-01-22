@@ -10,25 +10,25 @@ Feature:
 
   Scenario: I can check if the files in a directory fail to follow a pattern
       Given I have set a file name pattern like fail in my configuration
-        And There are no files in the directory
+        And The files one,two,three are in the directory
        When I run the program
-       Then I should see 1 error
-
+       Then I should see 3 errors
+    
   Scenario: I can check if the files in a directory follow a pattern
       Given I have set a file name pattern like fail in my configuration
-        And There is a file in the the directory named fail
+        And The file fail is in the directory
        When I run the program
        Then I should see 0 errors
 
   Scenario: I can check if all required files are present in a directory
       Given I have set a list of required file names like one,two,three
-        And There are files with the names one,two,three in the directory
+        And The files one,two,three are in the directory
        When I run the program
        Then I should see 0 errors
 
   Scenario: I can check if required files are missing in a directory
       Given I have set a list of required file names like one,two,three
-        And There are no files in the directory
+        And There are 0 files in the directory
        When I run the program
        Then I should see 3 errors
 
