@@ -79,8 +79,21 @@ module.exports = function () {
     });
 
     this.Given(/^the subdirectories all have the files (.+)$/, function (list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.randomSubdirs.forEach(function(dir) {
+
+            var paths = list.split(',').map(function (name) {
+
+                return path.join(dir, name);
+
+            });
+
+           this.mkfiles(paths);
+
+        }.bind(this));
+
+        callback();
+
     });
 
     this.Given(/^there (are|is) (\d+) subdirector(ies|y)$/, function (_, num, _2, callback) {
