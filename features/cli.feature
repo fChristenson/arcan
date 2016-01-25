@@ -31,7 +31,7 @@ Feature:
         And There are 0 files in the directory
        When I run the program
        Then I should see 3 errors
-    
+
   Scenario: I can check that all subdirectories in a directory have the required files
       Given that I have configured that all directories should have the files one,two,three
         And there is 1 subdirectory
