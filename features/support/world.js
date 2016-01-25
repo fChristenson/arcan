@@ -10,17 +10,30 @@ function World() {
     this.errors = [];
     this.config  = {};
     this.dirPath = 'tmp_test';
+    var that = this;
 
-    this.rmdir = function () {
+    this.rmdir = function rmdir(dirPath) {
 
-        var files = this.readdir(this.dirPath);
+        var files = that.readdir(dirPath);
+
         files.forEach(function (file) {
 
-            fs.unlinkSync(path.join(this.dirPath, file));
+            var filePath = path.join(dirPath, file);
+            var stat     = fs.statSync(filePath);
 
-        }.bind(this));
+            if (stat.isDirectory()) {
 
-        fs.rmdirSync(this.dirPath);
+                rmdir(filePath);
+
+            } else {
+
+                fs.unlinkSync(filePath);
+
+            }
+
+        });
+
+        fs.rmdirSync(dirPath);
 
     };
 
@@ -39,9 +52,9 @@ function World() {
 
     this.mkfiles = function (list) {
 
-        list.forEach(function (file) {
+        list.forEach(function (filePath) {
 
-            fs.writeFileSync(path.join(this.dirPath, file), file);
+            fs.writeFileSync(filePath, 'foo');
 
         }.bind(this));
 

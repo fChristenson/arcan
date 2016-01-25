@@ -1,13 +1,15 @@
 'use strict';
 
+var path   = require('path');
 var assert = require('assert');
+
 require('../support/world');
 
 module.exports = function () {
 
     this.After(function() {
 
-        this.rmdir();
+        this.rmdir(this.dirPath);
 
     });
 
@@ -20,7 +22,13 @@ module.exports = function () {
 
     this.Given(/^The files? (.+) (are|is) in the directory$/, function (list, _, callback) {
 
-        this.mkfiles(list.split(','));
+        var paths = list.split(',').map(function(name) {
+
+            return path.join(this.dirPath, name);
+
+        }.bind(this));
+
+        this.mkfiles(paths);
         callback();
 
     });
@@ -79,19 +87,45 @@ module.exports = function () {
         callback.pending();
     });
 
-    this.Given(/^there (is|are) a? director(ies|y) named (.+)$/, function (list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+    this.Given(/^there (is|are) a? director(ies|y) named (.+)$/, function (_, _2, list, callback) {
+
+        list.split(',').forEach(function(dir) {
+
+           this.mkdir(path.join(this.dirPath, dir));
+
+        }.bind(this));
+
+        callback();
+
     });
 
     this.Given(/^(.+) has the files? (.+)$/, function (name, list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        var dirPath = path.join(this.dirPath, name);
+        var filePaths = list.split(',').map(function (file) {
+
+            return path.join(dirPath, file);
+
+        });
+
+        this.mkfiles(filePaths);
+        callback();
+
     });
 
     this.Given(/^that I have configured that directory (.+) should only have files with names containing the word (.+)$/, function (name, word, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.config.directories = {};
+        this.config.directories[name] = {
+
+            files: {
+                pattern: new RegExp(word)
+            }
+
+        };
+
+        callback();
+
     });
 
 };
