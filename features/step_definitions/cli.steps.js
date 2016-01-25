@@ -63,8 +63,19 @@ module.exports = function () {
     });
 
     this.Given(/^that I have configured that all directories should have the files (.+)$/, function (list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.config = {
+
+            directories: {
+
+                requireAll: list.split(',')
+
+            }
+
+        };
+
+        callback();
+
     });
 
     this.Given(/^the subdirectories all have the files (.+)$/, function (list, callback) {
@@ -72,19 +83,52 @@ module.exports = function () {
         callback.pending();
     });
 
-    this.Given(/^there (are|is) (\d+) subdirector(ies|y)$/, function (num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+    this.Given(/^there (are|is) (\d+) subdirector(ies|y)$/, function (_, num, _2, callback) {
+
+        var dir;
+        var i;
+
+        for(i = 0; i < num; i++) {
+
+            dir = path.join(this.dirPath, 'foo' + i);
+            this.mkdir(dir);
+            this.randomSubdirs.push(dir);
+
+        }
+
+        callback();
+
     });
 
-    this.Given(/^(\d+) subdirector(ies|y) ha(ve|s) no files$/, function (num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+    this.Given(/^(\d+) subdirector(ies|y) ha(ve|s) (\d+) files?$/, function (num, _, _2, expectedNumFiles, callback) {
+
+        var that      = this;
+        var actualNum = this.randomSubdirs.reduce(function(count, dir) {
+
+            var numFiles = that.readdir(dir).length;
+            return (numFiles === parseInt(expectedNumFiles)) ? ++count : count;
+
+        }, 0);
+
+        assert.equal(actualNum, parseInt(num));
+        callback();
+
     });
 
     this.Given(/^that I have configured that directory (.+) should have the files? (.+)$/, function (name, list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.config = {
+
+            directories: {}
+        };
+        this.config.directories[name] = {
+
+            files: {required: list.split(',')}
+
+        };
+
+        callback();
+
     });
 
     this.Given(/^there (is|are) a? director(ies|y) named (.+)$/, function (_, _2, list, callback) {

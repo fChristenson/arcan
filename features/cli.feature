@@ -38,11 +38,11 @@ Feature:
         And the subdirectories all have the files one,two,three
        When I run the program
        Then I should see 0 errors
-
+    
   Scenario: I can check if any subdirectories in a directory are missing required files
       Given that I have configured that all directories should have the files one,two,three
         And there is 1 subdirectory
-        And 1 subdirectory has no files
+        And 1 subdirectory has 0 files
        When I run the program
        Then I should see 1 errors
 
@@ -60,7 +60,6 @@ Feature:
        When I run the program
        Then I should see 0 errors
 
-    @test
   Scenario: I can check if a specific subdirectory has files violating my configured rules
       Given that I have configured that directory foo should only have files with names containing the word foo
         And there is a directory named foo

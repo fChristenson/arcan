@@ -7,10 +7,11 @@ var fs   = require('fs');
 
 function World() {
 
-    this.errors = [];
-    this.config  = {};
-    this.dirPath = 'tmp_test';
-    var that = this;
+    this.errors        = [];
+    this.config        = {};
+    this.dirPath       = 'tmp_test';
+    this.randomSubdirs = [];
+    var that           = this;
 
     this.rmdir = function rmdir(dirPath) {
 
@@ -69,6 +70,18 @@ function World() {
         }
 
         return fs.readdirSync(path);
+
+    };
+
+    this.readdirDirs = function (path) {
+
+        if (!this.exist(path)) {
+
+            return [];
+
+        }
+
+        return fs.readdirSync(path).filter(U.isDirectory);
 
     };
 
