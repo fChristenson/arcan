@@ -9,9 +9,9 @@ function World() {
 
     this.errors = [];
     this.config  = {};
-    this.dirPath = '.tmp_test';
+    this.dirPath = 'tmp_test';
 
-    this.clearDir = function () {
+    this.rmdir = function () {
 
         var files = this.readdir(this.dirPath);
         files.forEach(function (file) {
@@ -19,6 +19,8 @@ function World() {
             fs.unlinkSync(path.join(this.dirPath, file));
 
         }.bind(this));
+
+        fs.rmdirSync(this.dirPath);
 
     };
 
@@ -28,7 +30,7 @@ function World() {
         this.errors = errorStr ? errorStr.split('\n') : [];
         this.errors = this.errors.filter(function(str) {
 
-            return /^\.tmp_test/.test(str);
+            return /^tmp_test/.test(str);
 
         });
         return errorStr;

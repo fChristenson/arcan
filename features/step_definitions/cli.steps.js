@@ -5,9 +5,9 @@ require('../support/world');
 
 module.exports = function () {
 
-    this.Before(function() {
+    this.After(function() {
 
-       this.clearDir();
+        this.rmdir();
 
     });
 
@@ -32,9 +32,12 @@ module.exports = function () {
 
     });
 
-    this.Given(/^There (is|are) (\d+) files? in the directory$/, function (num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+    this.Given(/^There (is|are) (\d+) files? in the directory$/, function (_, num, callback) {
+
+        var len = this.readdir(this.dirPath).length;
+        assert.equal(num, len);
+        callback();
+
     });
 
     this.Then(/^I should see (\d+) errors?$/, function (num, callback) {
@@ -45,8 +48,10 @@ module.exports = function () {
     });
 
     this.Given(/^I have set a list of required file names like (.+)$/, function (list, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.config.files = {required: list.split(',')};
+        callback();
+
     });
 
     this.Given(/^that I have configured that all directories should have the files (.+)$/, function (list, callback) {

@@ -666,6 +666,32 @@ describe('Util test', function() {
 
         });
 
+        it('should not return errors for the . dir when a subdir rule has no matching dir', function (done) {
+
+            var config = {
+
+                directories: {
+
+                    foo: {
+
+                        files: {
+
+                            required: ['barFile']
+
+                        }
+
+                    }
+
+                }
+
+            };
+
+            var result = U.validateLayout(testDir, config);
+            assert.equal(result.length, 0);
+            done();
+
+        });
+
     });
 
 });

@@ -103,27 +103,27 @@ var filenameMatches = function(files, paths) {
 module.exports.filenameMatches = filenameMatches;
 
 /**
- * [a]->[b]->[c]
+ * [a]->b->[c]->[d]
  *
  * Takes an array of strings and an array of filepaths,
  * returns the difference between the strings and the
  * filenames of the paths.
  *
- * @param files - String array
- * @param paths - String array with file paths
+ * @param files   - String array
+ * @param dirPath - path to directory with files
+ * @param paths   - String array with file paths
  *
  * @author Fredrik Christenson <fredrik.christenson@ticnet.se>
  */
-var missingFilenames = function(files, paths) {
+var missingFilenames = function(files, dirPath, paths) {
 
     var missing = Ramda.difference(files, File.filenames(paths));
     return missing.map(function(file) {
 
-        var filepath = path.dirname(paths[0]);
         return {
 
-           path: filepath,
-           error: file + ' is missing in ' + File.filename(filepath)
+           path: dirPath,
+           error: file + ' is missing in ' + File.filename(dirPath)
 
         };
 
@@ -201,6 +201,8 @@ module.exports.missingDirFiles = missingDirFiles;
  */
 var validateLayout = function(directoryPath, config) {
 
+    if (!fs.existsSync(directoryPath)) return [];
+
     var layout               = File.directoryToObject(directoryPath);
     var filesConfig          = config.files       || {};
     var dirConfig            = config.directories || {};
@@ -209,16 +211,16 @@ var validateLayout = function(directoryPath, config) {
     // list of files each subdirectory must have
     var requireAll           = (dirConfig.requireAll) ? dirConfig.requireAll : [];
     // We validate the directories files
-    var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout)        : [];
-    var missingRequiredFiles = (filesConfig.required) ? missingFilenames(filesConfig.required, fileLayout) : [];
-    var requiredFiles        = (filesConfig.required) ? filenameMatches(filesConfig.required, fileLayout)  : [];
+    var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout) : [];
+    var missingRequiredFiles = (filesConfig.required) ? missingFilenames(filesConfig.required, directoryPath, fileLayout) : [];
+    var requiredFiles        = (filesConfig.required) ? filenameMatches(filesConfig.required, fileLayout) : [];
     var unMatchedFiles       = Filter.filterErrors(invalidFiles, requiredFiles);
     // We validate the directory subdirectories
-    var invalidDirs          = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout)   : [];
-    var missingRequiredDirs  = (dirConfig.required) ? missingFilenames(dirConfig.required, dirLayout) : [];
-    var requiredDirs         = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout)  : [];
+    var invalidDirs          = (dirConfig.pattern)  ? directoryErrors(dirConfig.pattern, dirLayout) : [];
+    var missingRequiredDirs  = (dirConfig.required) ? missingFilenames(dirConfig.required, directoryPath, dirLayout) : [];
+    var requiredDirs         = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout) : [];
     var unMatchedDirs        = Filter.filterErrors(invalidDirs, requiredDirs);
-    var missingDirFilePaths  = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout)       : [];
+    var missingDirFilePaths  = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout) : [];
     var subdirs;
     var subdirErrors;
     var subdirPath;
