@@ -20,7 +20,7 @@ module.exports = function () {
 
     });
 
-    this.Given(/^The files? (.+) (are|is) in the directory$/, function (list, _, callback) {
+    this.Given(/^the files? (.+) (are|is) in the directory$/, function (list, _, callback) {
 
         var paths = list.split(',').map(function(name) {
 
@@ -40,7 +40,7 @@ module.exports = function () {
 
     });
 
-    this.Given(/^There (is|are) (\d+) files? in the directory$/, function (_, num, callback) {
+    this.Given(/^there (is|are) (\d+) files? in the directory$/, function (_, num, callback) {
 
         var len = this.readdir(this.dirPath).length;
         assert.equal(num, len);
@@ -78,7 +78,7 @@ module.exports = function () {
 
     });
 
-    this.Given(/^the subdirectories all have the files (.+)$/, function (list, callback) {
+    this.Given(/^the subdirectories all have the files? (.+)$/, function (list, callback) {
 
         this.randomSubdirs.forEach(function(dir) {
 
@@ -133,6 +133,7 @@ module.exports = function () {
         this.config = {
 
             directories: {}
+
         };
         this.config.directories[name] = {
 
@@ -186,23 +187,47 @@ module.exports = function () {
     });
 
     this.Given(/^that I have configured that all directories should have a shared configuration$/, function (callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+
+        this.config.directories = {};
+        this.config.directories.requireAll = {};
+        callback();
+
     });
 
-    this.Given(/^there (is|are) (\d+) file rules?$/, function (_, num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+    this.Given(/^in my shared configuration I have set a file name pattern like (.+)$/, function (pattern, callback) {
+
+        if(this.config.directories.requireAll.files) {
+
+            this.config.directories.requireAll.files.pattern = new RegExp(pattern);
+
+        } else {
+
+            this.config.directories.requireAll.files = {
+                pattern: new RegExp(pattern)
+            };
+
+        }
+
+        callback();
+
     });
 
-    this.Given(/^the subdirector(y|ies) meet (\d+) file rules?$/, function (_, num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
-    });
+    this.Given(/^in my shared configuration I have set a list of required file names like (.+)$/, function (list, callback) {
 
-    this.Given(/^the subdirector(y|ies) break (\d+) file rules?$/, function (_, num, callback) {
-        // Write code here that turns the phrase above into concrete actions
-        callback.pending();
+        if(this.config.directories.requireAll.files) {
+
+            this.config.directories.requireAll.files.required = list.split(',');
+
+        } else {
+
+            this.config.directories.requireAll.files = {
+                required: list.split(',')
+            };
+
+        }
+
+        callback();
+
     });
 
 };

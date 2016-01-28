@@ -177,6 +177,16 @@ module.exports.missingDirFiles = missingDirFiles;
 
 /**
  * Layout {}->Config {}->[]
+ *
+ * Validates that a file tree follows the rules
+ * in the provided config object.
+ *
+ * If there are errors an array of objects will be returned
+ * where each object describes what was wrong with a path
+ * to the failure.
+ *
+ * If no errors are found it returns an empty array.
+ *
  * @param layout - A object structured like a directory tree
  * {
  *      foo/bar: {
@@ -198,6 +208,8 @@ module.exports.missingDirFiles = missingDirFiles;
  *
  *   }
  * }
+ *
+ * @returns An array
  */
 var validateLayout = function(directoryPath, config) {
 

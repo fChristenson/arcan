@@ -5,46 +5,47 @@ Feature:
   has broken any of my rules.
 
   Background:
-        Given There is a directory
-          And There is a configuration
+        Given there is a directory
+          And there is a configuration
 
   Scenario: I can check if the files in a directory fail to follow a pattern
       Given I have set a file name pattern like fail in my configuration
-        And The files one,two,three are in the directory
+        And the files one,two,three are in the directory
        When I run the program
        Then I should see 3 errors
 
   Scenario: I can check if the files in a directory follow a pattern
       Given I have set a file name pattern like fail in my configuration
-        And The file fail is in the directory
+        And the file fail is in the directory
        When I run the program
        Then I should see 0 errors
 
   Scenario: I can check if all required files are present in a directory
       Given I have set a list of required file names like one,two,three
-        And The files one,two,three are in the directory
+        And the files one,two,three are in the directory
        When I run the program
        Then I should see 0 errors
 
   Scenario: I can check if required files are missing in a directory
       Given I have set a list of required file names like one,two,three
-        And There are 0 files in the directory
+        And there are 0 files in the directory
        When I run the program
        Then I should see 3 errors
 
   Scenario: I can check that all subdirectories in a directory follow a shared configuration
       Given that I have configured that all directories should have a shared configuration
-        And there is 1 file rule
+        And in my shared configuration I have set a file name pattern like foo
+        And in my shared configuration I have set a list of required file names like foo,foobar
         And there are 2 subdirectories
-        And the subdirectories meet 1 file rule
+        And the subdirectories all have the files foo,foobar
        When I run the program
        Then I should see 0 errors
 
   Scenario: I can check if any subdirectory in a directory with a shared configuration break the provided rules
       Given that I have configured that all directories should have a shared configuration
-        And there is 1 file rule
+        And in my shared configuration I have set a file name pattern like fail
         And there are 2 subdirectories
-        And the subdirectories break 1 file rule
+        And the subdirectories all have the file foo
        When I run the program
        Then I should see 2 errors
 
