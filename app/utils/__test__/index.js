@@ -277,13 +277,22 @@ describe('Util test', function() {
 
         });
 
-        it('should return emtpy array if all directories contain all files in requireAll', function(done) {
+        it('should return emtpy array if all directories follow the requireAll config', function(done) {
 
             var config = {
 
                 directories: {
 
-                    requireAll: ['required']
+                    requireAll: {
+
+                        files: {
+
+                            pattern: /r/,
+                            required: ['required']
+
+                        }
+
+                    }
 
                 }
 
@@ -295,20 +304,43 @@ describe('Util test', function() {
 
         });
 
-        it('should return array if any directory fail to contain all files in requireAll', function(done) {
+        it('should return array if any directory fail to follow the requireAll config', function(done) {
 
             var config = {
 
                 directories: {
 
-                    requireAll: ['fail']
+                    requireAll: {
+
+                        files: {
+
+                            pattern: /foo/,
+                            required: ['bar']
+
+                        },
+
+                        directories: {
+
+                            dir3: {
+
+                                files: {
+
+                                    pattern: /foo/,
+                                    required: ['bar']
+
+                                }
+
+                            }
+                        }
+
+                    }
 
                 }
 
             };
 
             var result = U.validateLayout(testDir, config);
-            assert.equal(result.length, 2);
+            assert.equal(result.length, 7);
             done();
 
         });

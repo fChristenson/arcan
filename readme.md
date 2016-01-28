@@ -29,7 +29,7 @@ module.exports = {
 
     directories: {
 
-        requireAll: ['important_file'], // Arcan will report any subdirectory that does not contain the required files
+        requireAll: {...},              // Arcan will report any subdirectory that does not follow the provided config
         foo: {                          // here we can set what subdirectories we want to configure rules for
 
             files: {...},

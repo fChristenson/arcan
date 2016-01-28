@@ -32,19 +32,21 @@ Feature:
        When I run the program
        Then I should see 3 errors
 
-  Scenario: I can check that all subdirectories in a directory have the required files
-      Given that I have configured that all directories should have the files one,two,three
-        And there is 1 subdirectory
-        And the subdirectories all have the files one,two,three
+  Scenario: I can check that all subdirectories in a directory follow a shared configuration
+      Given that I have configured that all directories should have a shared configuration
+        And there is 1 file rule
+        And there are 2 subdirectories
+        And the subdirectories meet 1 file rule
        When I run the program
        Then I should see 0 errors
 
-  Scenario: I can check if any subdirectories in a directory are missing required files
-      Given that I have configured that all directories should have the files one,two,three
-        And there is 1 subdirectory
-        And 1 subdirectory has 0 files
+  Scenario: I can check if any subdirectory in a directory with a shared configuration break the provided rules
+      Given that I have configured that all directories should have a shared configuration
+        And there is 1 file rule
+        And there are 2 subdirectories
+        And the subdirectories break 1 file rule
        When I run the program
-       Then I should see 1 errors
+       Then I should see 2 errors
 
   Scenario: I can check if a specific subdirectory has the required files
       Given that I have configured that directory foo should have the files one,two,three

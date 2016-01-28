@@ -206,10 +206,9 @@ var validateLayout = function(directoryPath, config) {
     var layout               = File.directoryToObject(directoryPath);
     var filesConfig          = config.files       || {};
     var dirConfig            = config.directories || {};
+    var requireAllConfig     = dirConfig.requireAll;
     var fileLayout           = layout.files       || {};
     var dirLayout            = Object.keys(layout.directories);
-    // list of files each subdirectory must have
-    var requireAll           = (dirConfig.requireAll) ? dirConfig.requireAll : [];
     // We validate the directories files
     var invalidFiles         = (filesConfig.pattern)  ? fileErrors(filesConfig.pattern, fileLayout) : [];
     var missingRequiredFiles = (filesConfig.required) ? missingFilenames(filesConfig.required, directoryPath, fileLayout) : [];
@@ -220,30 +219,36 @@ var validateLayout = function(directoryPath, config) {
     var missingRequiredDirs  = (dirConfig.required) ? missingFilenames(dirConfig.required, directoryPath, dirLayout) : [];
     var requiredDirs         = (dirConfig.required) ? filenameMatches(dirConfig.required, dirLayout) : [];
     var unMatchedDirs        = Filter.filterErrors(invalidDirs, requiredDirs);
-    var missingDirFilePaths  = (requireAll.length > 0) ? missingDirFiles(requireAll, dirLayout) : [];
-    var subdirs;
     var subdirErrors;
-    var subdirPath;
-    // We remove properties that are configs and not directories
-    dirConfig = Ramda.dissoc('requireAll', dirConfig);
-    dirConfig = Ramda.dissoc('pattern', dirConfig);
-    dirConfig = Ramda.dissoc('files', dirConfig);
-    dirConfig = Ramda.dissoc('required', dirConfig);
-    subdirs   = Object.keys(dirConfig);
 
-    if (subdirs.length > 0) {
+    if (dirLayout.length > 0 || requireAllConfig) {
 
-        subdirErrors = subdirs.map(function(subdirName) {
+        subdirErrors = dirLayout.map(function(subdir) {
 
-            subdirPath   = path.join(directoryPath, subdirName);
-            return validateLayout(subdirPath, config.directories[subdirName]);
+            var requireAllErrors = [];
+            var errors           = [];
+            var subdirConfig     = dirConfig[path.basename(subdir)];
+
+            if (requireAllConfig) {
+
+                requireAllErrors = validateLayout(subdir, requireAllConfig);
+
+            }
+
+            if (subdirConfig) {
+
+                errors = validateLayout(subdir, subdirConfig);
+
+            }
+
+            return errors.concat(requireAllErrors);
 
         });
 
     }
 
     subdirErrors = (subdirErrors) ? subdirErrors : [];
-    return Ramda.flatten([unMatchedFiles, missingRequiredFiles, missingRequiredDirs, unMatchedDirs, missingDirFilePaths, subdirErrors]);
+    return Ramda.flatten([unMatchedFiles, missingRequiredFiles, missingRequiredDirs, unMatchedDirs, subdirErrors]);
 
 };
 

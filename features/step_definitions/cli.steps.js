@@ -185,4 +185,24 @@ module.exports = function () {
 
     });
 
+    this.Given(/^that I have configured that all directories should have a shared configuration$/, function (callback) {
+        // Write code here that turns the phrase above into concrete actions
+        callback.pending();
+    });
+
+    this.Given(/^there (is|are) (\d+) file rules?$/, function (_, num, callback) {
+        // Write code here that turns the phrase above into concrete actions
+        callback.pending();
+    });
+
+    this.Given(/^the subdirector(y|ies) meet (\d+) file rules?$/, function (_, num, callback) {
+        // Write code here that turns the phrase above into concrete actions
+        callback.pending();
+    });
+
+    this.Given(/^the subdirector(y|ies) break (\d+) file rules?$/, function (_, num, callback) {
+        // Write code here that turns the phrase above into concrete actions
+        callback.pending();
+    });
+
 };
