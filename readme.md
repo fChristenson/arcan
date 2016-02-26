@@ -1,5 +1,5 @@
 # Arcan
-## TM Architecture Analyzer
+## Architecture Analyzer
 
 Arcan is project architecture analyzer, it is designed to allow
 you to configure rules for how you want a project to be structured.
