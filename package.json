@@ -1,6 +1,6 @@
 {
   "name": "arcan",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Analyze the architecture",
   "main": "arcan.js",
   "bin": {
@@ -13,10 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.tm.tmcs:fe-core/arcan.git"
+    "url": "https://github.com/fChristenson/arcan.git"
   },
-  "author": "Fredrik Christenson, Nicolo Taddei",
-  "license": "ISC",
+  "author": "Fredrik Christenson <fredrik.christenson@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "cli-color": "0.3.2",
     "commander": "2.9.0",
