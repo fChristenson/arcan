@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Analyze the architecture",
   "main": "arcan.js",
-  "bin": {
-    "arcan": "./bin/arcan.js"
-  },
   "scripts": {
     "test": "mocha --recursive app",
     "test-features": "cucumber-js",
