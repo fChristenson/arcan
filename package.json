@@ -1,12 +1,15 @@
 {
   "name": "arcan",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Analyze the architecture",
   "main": "arcan.js",
   "scripts": {
     "test": "mocha --recursive app",
     "test-features": "cucumber-js",
     "start": "node arcan.js"
+  },
+  "bin": {
+    "arcan": "bin/arcan.js"
   },
   "repository": {
     "type": "git",
