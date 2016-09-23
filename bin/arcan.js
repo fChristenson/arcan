@@ -4,9 +4,9 @@ var fs            = require('fs');
 var path          = require('path');
 var defaultConfig = path.join(process.cwd(), 'arcan.config.js');
 var clc           = require('cli-color');
-var pkg           = require('./package.json');
+var pkg           = require('../package.json');
 var program       = require('commander');
-var app           = require('./app');
+var app           = require('../app');
 var config;
 var result;
 
